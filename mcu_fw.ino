@@ -35,6 +35,9 @@ bool Timer(struct repeating_timer *t) {
 }
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
   // USB Serial Port Setup
   Serial.begin(9600);
   Serial1.begin(115200);
@@ -61,8 +64,9 @@ void setup() {
   }
   Udp.begin(localPort);
 
-
   add_repeating_timer_ms(3000, Timer, NULL, &st_timer);
+
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {
