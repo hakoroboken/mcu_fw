@@ -20,11 +20,19 @@ EthernetUDP Udp;
 
 IPAddress default_ip(192, 168, 0, 100);
 IPAddress default_myDns(192, 168, 0, 1);
+IPAddress broadcast_ip(255, 255, 255, 255);
 
 IPAddress device_ip;
 
 unsigned int localPort = 64202;             // local port to listen on
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];  // buffer to hold incoming packet,
+
+struct repeating_timer st_timer;
+bool timer_flag = false;
+bool Timer(struct repeating_timer *t) {
+  timer_flag = true;
+  return true;
+}
 
 void setup() {
   // USB Serial Port Setup
@@ -52,6 +60,9 @@ void setup() {
     Serial.println(Ethernet.localIP());
   }
   Udp.begin(localPort);
+
+
+  add_repeating_timer_ms(3000, Timer, NULL, &st_timer);
 }
 
 void loop() {
@@ -66,14 +77,17 @@ void loop() {
     Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
 
     String data_str(packetBuffer);
-    Serial.println(packetBuffer);
+    data_str.trim();
     if(data_str.indexOf("INFOREQ") != -1){
       device_ip = Udp.remoteIP();
-      Serial.print("INFOREQ get");
       return;
     }
 
     int power_int = data_str.toInt();
+    if(data_str != "0" && power_int == 0){
+      Serial.print("Unknow data");
+      return;
+    }
 
     if(power_int > 0){
       digitalWrite(3,HIGH);
@@ -99,11 +113,17 @@ void loop() {
   if(Serial1.available() > 0){
     String motor_power_str = Serial1.readStringUntil(0x0a);
     motor_power_str.trim();
-    // Serial.println(motor_power_str.toInt());
-
     Udp.beginPacket(device_ip, 64201);
     Udp.write(motor_power_str.c_str());
     Udp.endPacket();
     
+  }
+
+  if (timer_flag == true) {
+    timer_flag = false;
+    Udp.beginPacket(broadcast_ip, 64203);
+    String hello_str = Ethernet.localIP().toString() + "," + "rcm-rm-01";
+    Udp.write(hello_str.c_str());
+    Udp.endPacket();
   }
 }
