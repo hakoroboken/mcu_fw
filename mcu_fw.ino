@@ -38,6 +38,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
+  pinMode(4, INPUT_PULLUP);
+
   // USB Serial Port Setup
   Serial.begin(9600);
   Serial1.begin(115200);
@@ -129,5 +131,11 @@ void loop() {
     String hello_str = Ethernet.localIP().toString() + "," + "rcm-rm-01";
     Udp.write(hello_str.c_str());
     Udp.endPacket();
+  }
+
+  if(digitalRead(4) == LOW){
+    Serial1.write((uint8_t)(50));
+    Serial.println("hogehoge");
+    delay(50);
   }
 }
