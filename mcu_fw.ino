@@ -15,7 +15,11 @@
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+// USER SETTINGS 
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x01 };
+String DeviceName = "mcu-rm-01";
+// USER END 
+
 EthernetUDP Udp;
 
 IPAddress default_ip(192, 168, 0, 100);
@@ -23,6 +27,7 @@ IPAddress default_myDns(192, 168, 0, 1);
 IPAddress broadcast_ip(255, 255, 255, 255);
 
 IPAddress device_ip;
+bool isGetDeviceIp = false;
 
 unsigned int localPort = 64202;             // local port to listen on
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE];  // buffer to hold incoming packet,
@@ -66,7 +71,7 @@ void setup() {
   }
   Udp.begin(localPort);
 
-  add_repeating_timer_ms(3000, Timer, NULL, &st_timer);
+  add_repeating_timer_ms(1000, Timer, NULL, &st_timer);
 
   digitalWrite(LED_BUILTIN, HIGH);
 }
@@ -86,6 +91,7 @@ void loop() {
     data_str.trim();
     if(data_str.indexOf("INFOREQ") != -1){
       device_ip = Udp.remoteIP();
+      isGetDeviceIp = true;
       return;
     }
 
@@ -113,29 +119,26 @@ void loop() {
       rm_power = 255;
     }
     Serial1.write((uint8_t)(rm_power));
-
   }
 
-  if(Serial1.available() > 0){
+  if(Serial1.available() > 0 && isGetDeviceIp){
     String motor_power_str = Serial1.readStringUntil(0x0a);
     motor_power_str.trim();
     Udp.beginPacket(device_ip, 64201);
     Udp.write(motor_power_str.c_str());
     Udp.endPacket();
-    
   }
 
   if (timer_flag == true) {
     timer_flag = false;
     Udp.beginPacket(broadcast_ip, 64203);
-    String hello_str = Ethernet.localIP().toString() + "," + "rcm-rm-01";
+    String hello_str = Ethernet.localIP().toString() + "," + DeviceName;
     Udp.write(hello_str.c_str());
     Udp.endPacket();
   }
 
   if(digitalRead(4) == LOW){
     Serial1.write((uint8_t)(50));
-    Serial.println("hogehoge");
     delay(50);
   }
 }
