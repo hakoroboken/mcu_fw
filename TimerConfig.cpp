@@ -12,32 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <Arduino.h>
-#include "EthernetConfig.h"
 #include "TimerConfig.h"
+#include <EthernetUdp.h>
+#include "EthernetConfig.h"
 
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+struct repeating_timer st_timer;
+bool timer_flag = false;
 
-  pinMode(4, INPUT_PULLUP);
-  pinMode(3, OUTPUT);
-
-  Serial.begin(9600);
-  Serial1.begin(115200);
-
-  initializeEthernet();
-  setupTimer();
-  
-  digitalWrite(LED_BUILTIN, HIGH);
+bool Timer(struct repeating_timer *t) {
+  timer_flag = true;
+  return true;
 }
 
-void loop() {
-  processUdpPacket();
-  processTimer();
+void setupTimer() {
+  add_repeating_timer_ms(1000, Timer, NULL, &st_timer);
+}
 
-  if (digitalRead(4) == LOW) {
-    Serial1.write((uint8_t)50);
-    delay(50);
+void processTimer() {
+  if (timer_flag) {
+    timer_flag = false;
+    Udp.beginPacket(broadcast_ip, 64203);
+    String hello_str = Ethernet.localIP().toString() + "," + DeviceName;
+    Udp.write(hello_str.c_str());
+    Udp.endPacket();
   }
 }

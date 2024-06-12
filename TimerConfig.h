@@ -12,32 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef TIMER_CONFIG_H
+#define TIMER_CONFIG_H
+
 #include <Arduino.h>
-#include "EthernetConfig.h"
-#include "TimerConfig.h"
 
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+extern struct repeating_timer st_timer;
+extern bool timer_flag;
 
-  pinMode(4, INPUT_PULLUP);
-  pinMode(3, OUTPUT);
+bool Timer(struct repeating_timer *t);
+void setupTimer();
+void processTimer();
 
-  Serial.begin(9600);
-  Serial1.begin(115200);
-
-  initializeEthernet();
-  setupTimer();
-  
-  digitalWrite(LED_BUILTIN, HIGH);
-}
-
-void loop() {
-  processUdpPacket();
-  processTimer();
-
-  if (digitalRead(4) == LOW) {
-    Serial1.write((uint8_t)50);
-    delay(50);
-  }
-}
+#endif

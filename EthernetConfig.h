@@ -12,32 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <Arduino.h>
-#include "EthernetConfig.h"
-#include "TimerConfig.h"
+#ifndef ETHERNET_CONFIG_H
+#define ETHERNET_CONFIG_H
 
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 
-  pinMode(4, INPUT_PULLUP);
-  pinMode(3, OUTPUT);
+// USER SETTINGS 
+extern byte mac[];
+extern String DeviceName;
+// USER END 
 
-  Serial.begin(9600);
-  Serial1.begin(115200);
+extern EthernetUDP Udp;
 
-  initializeEthernet();
-  setupTimer();
-  
-  digitalWrite(LED_BUILTIN, HIGH);
-}
+extern IPAddress default_ip;
+extern IPAddress default_myDns;
+extern IPAddress broadcast_ip;
 
-void loop() {
-  processUdpPacket();
-  processTimer();
+extern IPAddress device_ip;
+extern bool isGetDeviceIp;
 
-  if (digitalRead(4) == LOW) {
-    Serial1.write((uint8_t)50);
-    delay(50);
-  }
-}
+extern unsigned int localPort;
+extern char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+
+void initializeEthernet();
+void processUdpPacket();
+
+#endif
