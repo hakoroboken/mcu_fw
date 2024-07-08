@@ -12,33 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef IO_CONFIG_H
+#define IO_CONFIG_H
+
 #include <Arduino.h>
-#include "EthernetConfig.h"
-#include "TimerConfig.h"
-#include "IOConfig.h"
 
-void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+constexpr int DEBUG_BUTTON_PIN = 4;
+constexpr int FOR_F303K8_CW_CCW = 3;
 
-  pinMode(DEBUG_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(FOR_F303K8_CW_CCW, OUTPUT);
-
-  Serial.begin(9600);
-  Serial1.begin(115200);
-
-  initializeEthernet();
-  setupTimer();
-  
-  digitalWrite(LED_BUILTIN, HIGH);
-}
-
-void loop() {
-  processUdpPacket();
-  processTimer();
-
-  if (digitalRead(4) == LOW) {
-    Serial1.write((uint8_t)50);
-    delay(50);
-  }
-}
+#endif

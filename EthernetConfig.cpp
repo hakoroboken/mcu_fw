@@ -14,8 +14,8 @@
 
 #include "EthernetConfig.h"
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x03 };
-String DeviceName = "mcu-rm-03";
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0x05 };
+String DeviceName = "mcu-rm-05";
 
 EthernetUDP Udp;
 
